@@ -20,6 +20,82 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
  */
 
-/* eslint-disable no-console */
-console.log( 'Hello World! (from create-block-slideshow-block block)' );
-/* eslint-enable no-console */
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay, Mousewheel, A11y } from 'swiper/modules';
+
+document.querySelectorAll('.swiper').forEach(function (el) {
+
+	let slideItems = parseInt(el.dataset.slideitems, 10);
+	let scrollSpeed = parseInt(el.dataset.scrollspeed);
+	let autoplayDelay = parseInt(el.dataset.autoplaydelay, 10);
+	let enableMousewheel = el.dataset.enablemousewheel === 'true';
+	let enableNavigation = el.dataset.enablenavigation === 'true';
+	let enablePagination = el.dataset.enablepagination === 'true';
+	let enableResponsive = el.dataset.enableresponsive === 'true';
+	let autoLoop = el.dataset.autoloop === 'true';
+	let enableAutoplay = el.dataset.enableautoplay === 'true';
+	let showPostContent = el.dataset.showpostcontent === 'true';
+	let showPostMeta = el.dataset.showpostmeta === 'true';
+	let showPostTitle = el.dataset.showposttitle === 'true';
+	let showThumb = el.dataset.showthumb === 'true';
+
+
+	console.log(slideItems, scrollSpeed, autoplayDelay, enableMousewheel, enableNavigation, enablePagination, autoLoop, enableAutoplay, showPostContent, showPostMeta, showPostTitle, showThumb);
+
+
+	let swiperConfig = {};
+	swiperConfig = {
+		modules: [Navigation, Pagination, Mousewheel, A11y, Autoplay],
+		spaceBetween: 20,
+		slidesPerView: slideItems,
+		navigation: {
+			enabled: false,
+			nextEl: '.swiper-button-next',
+			prevEl: '.swiper-button-prev',
+		},
+
+	};
+
+	if (enableNavigation) {
+		swiperConfig.navigation = enableNavigation || false;
+	}
+
+	if (enablePagination) {
+		swiperConfig.pagination = enablePagination ? { clickable: true } : false
+	}
+
+	if (enableAutoplay) {
+		swiperConfig.loop = autoLoop || true
+	}
+
+
+	if (autoplayDelay) {
+		swiperConfig.autoplay = autoplayDelay
+			? { delay: autoplayDelay.delay || 5000 }
+			: false
+	}
+
+	if (enableMousewheel) {
+		swiperConfig.mousewheel = enableMousewheel ? { forceToAxis: true } : false
+	}
+
+	if (enableResponsive) {
+		swiperConfig.breakpoints = {
+			320: {
+				slidesPerView: 1,
+				spaceBetween: 0
+			},
+			767: {
+				slidesPerView: 2,
+				spaceBetween: 40
+			},
+			1024: {
+				slidesPerView: 3,
+				spaceBetween: 40
+			}
+		}
+	}
+
+	new Swiper(el, swiperConfig);
+
+});

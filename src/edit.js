@@ -16,13 +16,17 @@ import { TextControl, Button, ToggleControl, CheckboxControl, PanelBody, RangeCo
 import { useState, useEffect } from '@wordpress/element';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Navigation, Pagination, Scrollbar, Mousewheel, A11y, Autoplay } from 'swiper/modules';
 
-// import Swiper and modules styles
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/scrollbar';
+
+// Import library functions
+import {
+	isValidUrl,
+	formatDateString,
+	fetchMediaDetails,
+	fetchAuthorInformation,
+} from './lib/functions';
+
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -30,53 +34,62 @@ import 'swiper/css/scrollbar';
  *
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
-import './editor.scss';
+// import './editor.scss';
 
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- * ${url}/wp-json/wp/v2/posts
+ *
  * @return {Element} Element to render.
  */
 
 export default function Edit({ attributes, setAttributes }) {
-	// Initialize URL from attributes
+	// Define the initial state using the attributes passed from the editor
 	const [inspectControlUrl, setInspectControlUrl] = useState(attributes.apiUrl);
-
-	// Additional state for switch, checkbox, and range
 	const [toggleValue, setToggleValue] = useState(attributes.toggleValue);
 	const [checkboxValue, setCheckboxValue] = useState(attributes.checkboxValue);
 	const [rangeValue, setRangeValue] = useState(attributes.rangeValue);
-
-	// Additional state for API URL, new API URL, URL error, and post data
 	const [apiUrl, setApiUrl] = useState(attributes.apiPostUrl);
 	const [newApiUrl, setNewApiUrl] = useState(null);
 	const [urlError, setUrlError] = useState('');
-	const [postData, setPostData] = useState([]);
+	const [postData, setPostData] = useState(attributes.apiPostData);
 	const [isValidUrlMessage, setIsValidUrlMessage] = useState('');
+	const [isLoading, setIsLoading] = useState(true);
 
-	// Function to update inspectControlUrl
-	const handleInspectControlUrlChange = (newUrl) => {
-		setInspectControlUrl(newUrl);
+
+	// Function to update the API URL in the InspectorControls component
+	const handleInspectControlButtonClick = () => {
+		setPostData([]);
+		setIsLoading(true);
+
+		if (newApiUrl && typeof newApiUrl === 'string' && newApiUrl.endsWith('/')) {
+			setNewApiUrl(newApiUrl.replace(/\/$/, ''));
+		}
+
+		// if (newApiUrl.endsWith('/')) {
+		// 	setNewApiUrl(newApiUrl.replace(/\/$/, ''));
+		// }
+
+		if (isValidUrl(newApiUrl || apiUrl)) {
+			setAttributes({
+				apiUrl: inspectControlUrl,
+				toggleValue,
+				checkboxValue,
+				rangeValue,
+				apiPostUrl: newApiUrl || apiUrl,
+			});
+
+			getExternalApiPosts(newApiUrl || apiUrl);
+		} else {
+			setUrlError('Invalid URL. Please enter a URL starting with http:// or https://');
+		}
 	};
 
-	// Functions to update switch, checkbox, and range
-	const handleToggleChange = (value) => {
-		setToggleValue(value);
-	};
-
-	const handleCheckboxChange = (value) => {
-		setCheckboxValue(value);
-	};
-
-	const handleRangeChange = (value) => {
-		setRangeValue(value);
-	};
-
-	// Function to update API URL and check validity
+	// Function to check if the URL is valid
 	const handleApiUrlChange = (newUrl) => {
+
 		setNewApiUrl(newUrl);
 
 		if (isValidUrl(newUrl)) {
@@ -86,68 +99,58 @@ export default function Edit({ attributes, setAttributes }) {
 		}
 	};
 
-	// Function to handle button click
-	const handleInspectControlButtonClick = () => {
-		// Check if the URL is valid before updating attributes
-		if (isValidUrl(newApiUrl || apiUrl)) {
-			// Update the attributes with the new values
-			setAttributes({
-				apiUrl: inspectControlUrl,
-				toggleValue,
-				checkboxValue,
-				rangeValue,
-				apiPostUrl: newApiUrl || apiUrl, // Update the API URL if a new one is provided
-			});
-			// Fetch and update post data based on the updated API URL
-			uploadMultiple(newApiUrl || apiUrl);
-		} else {
-			// Display an error message if the URL is not valid
-			setUrlError('Invalid URL. Please enter a URL starting with http:// or https://');
-		}
-	};
-
-	// Function to check if the URL is valid
-	const isValidUrl = (url) => {
-		const pattern = /^(https?:\/\/)/;
-		return pattern.test(url);
-	};
-
-	// Function to fetch post data
-	const uploadMultiple = async (url) => {
+	// Function to fetch post data from the API
+	const getExternalApiPosts = async (url) => {
 		try {
 			const response = await fetch(`${url}/wp-json/wp/v2/posts`);
 			const result = await response.json();
-			setPostData(result);
-			console.log("Success:", result);
+
+			const mediaDetailsPromises = result.map(async (post) => {
+				if (post.featured_media) {
+					return fetchMediaDetails(url, post.featured_media);
+				}
+				return null;
+			});
+
+			const mediaDetails = await Promise.all(mediaDetailsPromises);
+			const authorDetailsPromises = result.map(async (post) => {
+				if (post._links && post._links.author) {
+					return fetchAuthorInformation(post._links.author[0].href);
+				}
+				return null;
+			});
+
+			const authorDetails = await Promise.all(authorDetailsPromises);
+
+			const updatedPostData = result.map((post, index) => {
+				return {
+					...post,
+					featured_image: mediaDetails[index],
+					author_data: authorDetails[index],
+				};
+			});
+
+			setAttributes({ apiPostData: updatedPostData });
+			setPostData(updatedPostData);
+			setIsLoading(false);
 		} catch (error) {
 			console.error("Error:", error);
 		}
 	};
 
-	const fetchMediaDetails = async (mediaId) => {
-		try {
-			const mediaResponse = await fetch(`${url}/wp-json/wp/v2/media/${mediaId}`);
-			const mediaResult = await mediaResponse.json();
-			setPostData(result);
-			return mediaResult;
-		} catch (error) {
-			console.error('Error fetching media details from API', error);
-			throw error;
-		}
-	};
-
 	useEffect(() => {
-		// Fetch post data on initial render
-		uploadMultiple(apiUrl);
+		console.log(attributes);
+		if (attributes.apiPostData.length > 0) {
+			setIsLoading(false);
+		}
+		getExternalApiPosts(apiUrl);
 	}, [apiUrl]);
 
-	const blockProps = useBlockProps({
-		className: 'api-post-slider',
-	});
-
 	return (
-		<div {...blockProps}>
-			<h4 style={{ 'textAlign': 'center' }}>API Posts Slider</h4>
+		<div {...useBlockProps({
+			className: 'api-post-slider',
+		})}>
+			<h2 className='api-post-title' style={{ 'textAlign': 'center' }}>API Posts Slider</h2>
 			<InspectorControls>
 				<PanelBody title="Slider Settings">
 					<TextControl
@@ -161,24 +164,131 @@ export default function Edit({ attributes, setAttributes }) {
 					{urlError && <div style={{ color: 'red' }}>{urlError}</div>}
 					<Button variant="secondary" onClick={handleInspectControlButtonClick}>Update Values</Button>
 				</PanelBody>
+				<PanelBody title="Show/Hide Items">
+					<ToggleControl
+						label="Show Thumbnail"
+						checked={attributes.showThumb}
+						onChange={() => setAttributes({ showThumb: !attributes.showThumb })}
+					/>
+					<ToggleControl
+						label="Show Post Title"
+						checked={attributes.showPostTitle}
+						onChange={() => setAttributes({ showPostTitle: !attributes.showPostTitle })}
+					/>
+					<ToggleControl
+						label="Show Post Meta"
+						checked={attributes.showPostMeta}
+						onChange={() => setAttributes({ showPostMeta: !attributes.showPostMeta })}
+					/>
+					<ToggleControl
+						label="Show Post Content"
+						checked={attributes.showPostContent}
+						onChange={() => setAttributes({ showPostContent: !attributes.showPostContent })}
+					/>
+					{/* Add more ToggleControl components as needed */}
+				</PanelBody>
+				<PanelBody title="Numerical Settings">
+					<TextControl
+						label="Number of Slide Items"
+						type="number"
+						value={attributes.slideItems}
+						onChange={(value) => setAttributes({ slideItems: parseInt(value) })}
+					/>
+					<ToggleControl
+						label="Enable Responsive"
+						checked={attributes.enableResponsive}
+						onChange={() => setAttributes({ enableResponsive: !attributes.enableResponsive })}
+					/>
+					<ToggleControl
+						label="Enable Infinite Loop"
+						checked={attributes.autoLoop}
+						onChange={() => setAttributes({ autoLoop: !attributes.autoLoop })}
+					/>
+					<TextControl
+						label="Scroll Speed"
+						type="number"
+						value={attributes.scrollSpeed}
+						onChange={(value) => setAttributes({ scrollSpeed: parseInt(value) })}
+					/>
+					<ToggleControl
+						label="Enable Mousewheel"
+						checked={attributes.enableMousewheel}
+						onChange={() => setAttributes({ enableMousewheel: !attributes.enableMousewheel })}
+					/>
+					<ToggleControl
+						label="Enable Navigation"
+						checked={attributes.enableNavigation}
+						onChange={() => setAttributes({ enableNavigation: !attributes.enableNavigation })}
+					/>
+					<ToggleControl
+						label="Enable Pagination"
+						checked={attributes.enablePagination}
+						onChange={() => setAttributes({ enablePagination: !attributes.enablePagination })}
+					/>
+					<ToggleControl
+						label="Enable Autoplay"
+						checked={attributes.enableAutoplay}
+						onChange={() => setAttributes({ enableAutoplay: !attributes.enableAutoplay })}
+					/>
+					{attributes.enableAutoplay &&
+						<TextControl
+							label="Autoplay Delay"
+							type="number"
+							value={attributes.autoplayDelay}
+							onChange={(value) => setAttributes({ autoplayDelay: parseInt(value) })}
+						/>
+					}
+					{/* Add more TextControl components as needed */}
+				</PanelBody>
 			</InspectorControls>
 
+			{isLoading &&
+				<div style={{ 'display': 'flex', 'justifyContent': 'center' }}>
+					<div class="lds-ripple"><div></div><div></div></div>
+				</div>
+			}
+
 			<Swiper
-				modules={[Navigation, Pagination, Scrollbar, A11y]}
-				spaceBetween={50}
-				slidesPerView={3}
-				navigation
-				loop={true}
-				pagination={{ clickable: true }}
-				scrollbar={{ draggable: true }}
-				onSwiper={(swiper) => console.log(swiper)}
-				onSlideChange={() => console.log('slide change')}
+				modules={[Navigation, Pagination, Mousewheel, A11y, Autoplay]}
+				spaceBetween={20}
+				slidesPerView={attributes.slideItems}
+				navigation={attributes.enableNavigation || false}
+				autoplay={
+					attributes.autoplay
+						? { delay: attributes.autoplay.delay || 5000 }
+						: false
+				}
+				mousewheel={attributes.enableMousewheel ? { forceToAxis: true } : false}
+				loop={attributes.autoLoop || true}
+				pagination={attributes.enablePagination ? { clickable: true } : false}
 			>
 				{postData.map((slide, index) => (
 					<SwiperSlide key={index}>
-						<h4 style={{ 'fontSize': '20px' }}>
-							<div dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
-						<div dangerouslySetInnerHTML={{ __html: slide.excerpt.rendered }} />
+						<div className='post-thumb'>
+							{attributes.showThumb &&
+								<a href={slide.link}>
+									<img src={slide.featured_image.medium} alt="Medium Size" />
+								</a>
+							}
+						</div>
+						<div className='post-content'>
+							{attributes.showPostMeta &&
+								<p className='post-meta'>
+									<span className='author'>
+										👤 {slide.author_data.name}
+									</span>
+									<span className='date'>
+										📅 {formatDateString(slide.date)}
+									</span>
+								</p>
+							}
+							{attributes.showPostTitle &&
+								<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
+							}
+							{attributes.showPostContent &&
+								<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
+							}
+						</div>
 					</SwiperSlide>
 				))}
 			</Swiper>

@@ -36,6 +36,62 @@ registerBlockType(metadata.name, {
 			type: 'string',
 			default: 'https://wptavern.com',
 		},
+		apiPostData: {
+			type: 'array',
+			default: [],
+		},
+		showThumb: {
+			type: 'boolean',
+			default: true,
+		},
+		showPostTitle: {
+			type: 'boolean',
+			default: true,
+		},
+		enableResponsive: {
+			type: 'boolean',
+			default: true,
+		},
+		showPostMeta: {
+			type: 'boolean',
+			default: true,
+		},
+		showPostContent: {
+			type: 'boolean',
+			default: true,
+		},
+		enableAutoplay: {
+			type: 'boolean',
+			default: true,
+		},
+		autoLoop: {
+			type: 'boolean',
+			default: true,
+		},
+		enablePagination: {
+			type: 'boolean',
+			default: true,
+		},
+		enableNavigation: {
+			type: 'boolean',
+			default: true,
+		},
+		enableMousewheel: {
+			type: 'boolean',
+			default: false,
+		},
+		slideItems: {
+			type: 'number',
+			default: 3,
+		},
+		scrollSpeed: {
+			type: 'number',
+			default: 500,
+		},
+		autoplayDelay: {
+			type: 'number',
+			default: 3000,
+		},
 	},
 	edit: Edit,
 
