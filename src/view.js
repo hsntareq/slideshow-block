@@ -65,7 +65,10 @@ document.querySelectorAll('.swiper').forEach(function (el) {
 	}
 
 	if (enablePagination) {
-		swiperConfig.pagination = { clickable: true };
+		swiperConfig.pagination = {
+			el: el.querySelector('.swiper-pagination'),
+			clickable: true
+		};
 	}
 
 	if (enableAutoplay) {
