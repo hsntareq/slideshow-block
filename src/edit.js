@@ -19,12 +19,14 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 
 // Import library functions
+import Message from './components/Message';
 import {
 	fetchAuthorInformation,
 	fetchMediaDetails,
 	formatDateString,
 	isValidUrl,
 } from './lib/functions';
+
 
 
 /**
@@ -109,13 +111,15 @@ export default function Edit({ attributes, setAttributes }) {
 			const result = await response.json();
 
 			if (!response.ok) {
-				setApiError('DRA: Only authenticated users can access the REST API.');
+				const errorMessage = result.message || 'Failed to fetch posts from the API.';
+				setApiError(errorMessage);
 				setIsLoading(false);
 				return;
 			}
 
 			if (result.code) {
-				setApiError('DRA: Only authenticated users can access the REST API.');
+				const errorMessage = result.message || 'DRA: Only authenticated users can access the REST API.';
+				setApiError(errorMessage);
 				setIsLoading(false);
 				return;
 			}
@@ -148,10 +152,27 @@ export default function Edit({ attributes, setAttributes }) {
 			setAttributes({ apiPostData: updatedPostData });
 			setPostData(updatedPostData);
 			setIsLoading(false);
+			setUrlError('');
+			setIsValidUrlMessage('Data loaded successfully!');
 		} catch (error) {
 			console.error("Error:", error);
-			setApiError('DRA: Only authenticated users can access the REST API.');
+			let errorMessage = 'An error occurred while fetching posts.';
+
+			// Check for CORS or network errors
+			if (error instanceof TypeError) {
+				if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+					errorMessage = 'CORS Policy Error: Access to the remote site was blocked. The site may not allow cross-origin requests. Contact the site administrator.';
+				} else {
+					errorMessage = error.message;
+				}
+			} else {
+				errorMessage = error.message || 'An error occurred while fetching posts.';
+			}
+
+			setApiError(errorMessage);
 			setIsLoading(false);
+			setUrlError('');
+			setIsValidUrlMessage('');
 		}
 	};
 
@@ -175,37 +196,11 @@ export default function Edit({ attributes, setAttributes }) {
 						value={newApiUrl ?? apiUrl}
 						onChange={handleApiUrlChange}
 					/>
-					<div style={{ color: isValidUrlMessage.includes('Invalid') ? 'red' : 'green' }}>
-						{isValidUrlMessage}
-					</div>
-					{urlError && <div style={{ color: 'red' }}>{urlError}</div>}
-					{apiError && showApiError && (
-						<div style={{
-							color: 'red',
-							marginBlock: '10px',
-							padding: '10px',
-							backgroundColor: '#ffebee',
-							borderRadius: '4px',
-							display: 'flex',
-							justifyContent: 'space-between',
-							alignItems: 'center'
-						}}>
-							<span>{apiError}</span>
-							<button
-								onClick={() => setShowApiError(false)}
-								style={{
-									background: 'none',
-									border: 'none',
-									color: 'red',
-									cursor: 'pointer',
-									fontSize: '16px',
-									padding: '0 5px'
-								}}
-							>
-								✕
-							</button>
-						</div>
-					)}
+					<Message
+						type={apiError ? 'error' : (urlError ? 'error' : (isValidUrlMessage.includes('Invalid') ? 'error' : 'success'))}
+						message={apiError && showApiError ? apiError : (urlError || isValidUrlMessage)}
+						onClose={apiError && showApiError ? () => setShowApiError(false) : null}
+					/>
 					<Button variant="secondary" onClick={handleInspectControlButtonClick}>Update Values</Button>
 				</PanelBody>
 				<PanelBody title="Show/Hide Items">
@@ -213,21 +208,25 @@ export default function Edit({ attributes, setAttributes }) {
 						label="Show Thumbnail"
 						checked={attributes.showThumb}
 						onChange={() => setAttributes({ showThumb: !attributes.showThumb })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Show Post Title"
 						checked={attributes.showPostTitle}
 						onChange={() => setAttributes({ showPostTitle: !attributes.showPostTitle })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Show Post Meta"
 						checked={attributes.showPostMeta}
 						onChange={() => setAttributes({ showPostMeta: !attributes.showPostMeta })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Show Post Content"
 						checked={attributes.showPostContent}
 						onChange={() => setAttributes({ showPostContent: !attributes.showPostContent })}
+						__nextHasNoMarginBottom={true}
 					/>
 					{/* Add more ToggleControl components as needed */}
 				</PanelBody>
@@ -242,11 +241,13 @@ export default function Edit({ attributes, setAttributes }) {
 						label="Enable Responsive"
 						checked={attributes.enableResponsive}
 						onChange={() => setAttributes({ enableResponsive: !attributes.enableResponsive })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Enable Infinite Loop"
 						checked={attributes.autoLoop}
 						onChange={() => setAttributes({ autoLoop: !attributes.autoLoop })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<TextControl
 						label="Scroll Speed"
@@ -258,21 +259,25 @@ export default function Edit({ attributes, setAttributes }) {
 						label="Enable Mousewheel"
 						checked={attributes.enableMousewheel}
 						onChange={() => setAttributes({ enableMousewheel: !attributes.enableMousewheel })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Enable Navigation"
 						checked={attributes.enableNavigation}
 						onChange={() => setAttributes({ enableNavigation: !attributes.enableNavigation })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Enable Pagination"
 						checked={attributes.enablePagination}
 						onChange={() => setAttributes({ enablePagination: !attributes.enablePagination })}
+						__nextHasNoMarginBottom={true}
 					/>
 					<ToggleControl
 						label="Enable Autoplay"
 						checked={attributes.enableAutoplay}
 						onChange={() => setAttributes({ enableAutoplay: !attributes.enableAutoplay })}
+						__nextHasNoMarginBottom={true}
 					/>
 					{attributes.enableAutoplay &&
 						<TextControl
@@ -292,52 +297,54 @@ export default function Edit({ attributes, setAttributes }) {
 				</div>
 			}
 
-			<Swiper
-				modules={[Navigation, Pagination, Mousewheel, A11y, Autoplay]}
-				spaceBetween={20}
-				slidesPerView={attributes.slideItems}
-				navigation={attributes.enableNavigation || false}
-				autoplay={
-					attributes.autoplay
-						? { delay: attributes.autoplay.delay || 5000 }
-						: false
-				}
-				mousewheel={attributes.enableMousewheel ? { forceToAxis: true } : false}
-				loop={attributes.autoLoop || true}
-				pagination={attributes.enablePagination ? { clickable: true } : false}
-			>
-				{postData.map((slide, index) => (
-					<SwiperSlide key={index}>
-						<div className='post-thumb'>
-							{attributes.showThumb &&
-								<a href={slide.link}>
-									<img src={slide.featured_image.medium} alt="Medium Size" />
-								</a>
-							}
-						</div>
-						{(attributes.showPostMeta || attributes.showPostTitle || attributes.showPostContent) && (
-							<div className='post-content'>
-								{attributes.showPostMeta &&
-									<p className='post-meta'>
-										<span className='author'>
-											👤 {slide.author_data.name}
-										</span>
-										<span className='date'>
-											📅 {formatDateString(slide.date)}
-										</span>
-									</p>
-								}
-								{attributes.showPostTitle &&
-									<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
-								}
-								{attributes.showPostContent &&
-									<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
+			{postData.length > 0 && (
+				<Swiper
+					modules={[Navigation, Pagination, Mousewheel, A11y, Autoplay]}
+					spaceBetween={20}
+					slidesPerView={attributes.slideItems}
+					navigation={attributes.enableNavigation || false}
+					autoplay={
+						attributes.autoplay
+							? { delay: attributes.autoplay.delay || 5000 }
+							: false
+					}
+					mousewheel={attributes.enableMousewheel ? { forceToAxis: true } : false}
+					loop={postData.length > attributes.slideItems && attributes.autoLoop}
+					pagination={attributes.enablePagination ? { clickable: true } : false}
+				>
+					{postData.map((slide, index) => (
+						<SwiperSlide key={index}>
+							<div className='post-thumb'>
+								{attributes.showThumb &&
+									<a href={slide.link}>
+										<img src={slide.featured_image.medium} alt="Medium Size" />
+									</a>
 								}
 							</div>
-						)}
-					</SwiperSlide>
-				))}
-			</Swiper>
+							{(attributes.showPostMeta || attributes.showPostTitle || attributes.showPostContent) && (
+								<div className='post-content'>
+									{attributes.showPostMeta &&
+										<p className='post-meta'>
+											<span className='author'>
+												👤 {slide.author_data.name}
+											</span>
+											<span className='date'>
+												📅 {formatDateString(slide.date)}
+											</span>
+										</p>
+									}
+									{attributes.showPostTitle &&
+										<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
+									}
+									{attributes.showPostContent &&
+										<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
+									}
+								</div>
+							)}
+						</SwiperSlide>
+					))}
+				</Swiper>
+			)}
 		</div>
 	);
 }

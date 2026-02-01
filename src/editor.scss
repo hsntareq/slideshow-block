@@ -9,6 +9,41 @@
 @import 'swiper/css/scrollbar';
 @import 'swiper/css/keyboard';
 
+.components-panel__body {
+	.lds_message {
+		margin-block-end: 15px;
+		padding: 10px;
+		border-radius: 4px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background-color: #f2f2f2;
+
+		&.red {
+			color: rgb(210, 50, 50);
+		}
+
+		&.orange {
+			color: #9b7c44;
+		}
+
+		&.green {
+			color: rgb(76, 120, 76);
+		}
+
+		&.blue {
+			color: rgb(76, 76, 156);
+		}
+	}
+
+	.ide_button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-size: 16px;
+		padding: 0 5px;
+	}
+}
 
 .api-post-slider {
 	padding-block: 50px;
