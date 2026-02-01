@@ -3,7 +3,6 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
  */
-import { __ } from '@wordpress/i18n';
 
 /**
  * React hook that is used to mark the block wrapper element.
@@ -12,19 +11,19 @@ import { __ } from '@wordpress/i18n';
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { TextControl, Button, ToggleControl, CheckboxControl, PanelBody, RangeControl } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { Button, PanelBody, TextControl, ToggleControl } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 
+import { A11y, Autoplay, Mousewheel, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Scrollbar, Mousewheel, A11y, Autoplay } from 'swiper/modules';
 
 
 // Import library functions
 import {
-	isValidUrl,
-	formatDateString,
-	fetchMediaDetails,
 	fetchAuthorInformation,
+	fetchMediaDetails,
+	formatDateString,
+	isValidUrl,
 } from './lib/functions';
 
 
@@ -271,24 +270,26 @@ export default function Edit({ attributes, setAttributes }) {
 								</a>
 							}
 						</div>
-						<div className='post-content'>
-							{attributes.showPostMeta &&
-								<p className='post-meta'>
-									<span className='author'>
-										👤 {slide.author_data.name}
-									</span>
-									<span className='date'>
-										📅 {formatDateString(slide.date)}
-									</span>
-								</p>
-							}
-							{attributes.showPostTitle &&
-								<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
-							}
-							{attributes.showPostContent &&
-								<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
-							}
-						</div>
+						{(attributes.showPostMeta || attributes.showPostTitle || attributes.showPostContent) && (
+							<div className='post-content'>
+								{attributes.showPostMeta &&
+									<p className='post-meta'>
+										<span className='author'>
+											👤 {slide.author_data.name}
+										</span>
+										<span className='date'>
+											📅 {formatDateString(slide.date)}
+										</span>
+									</p>
+								}
+								{attributes.showPostTitle &&
+									<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
+								}
+								{attributes.showPostContent &&
+									<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
+								}
+							</div>
+						)}
 					</SwiperSlide>
 				))}
 			</Swiper>

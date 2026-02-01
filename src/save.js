@@ -47,24 +47,26 @@ export default function save({ attributes }) {
 										</a>
 									}
 								</div>
-								<div className='post-content'>
-									{attributes.showPostMeta &&
-										<p className='post-meta'>
-											<span className='author'>
-												👤 {slide.author_data.name}
-											</span>
-											<span className='date'>
-												📅 {formatDateString(slide.date)}
-											</span>
-										</p>
-									}
-									{attributes.showPostTitle &&
-										<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
-									}
-									{attributes.showPostContent &&
-										<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
-									}
-								</div>
+								{(attributes.showPostMeta || attributes.showPostTitle || attributes.showPostContent) && (
+									<div className='post-content'>
+										{attributes.showPostMeta &&
+											<p className='post-meta'>
+												<span className='author'>
+													👤 {slide.author_data.name}
+												</span>
+												<span className='date'>
+													📅 {formatDateString(slide.date)}
+												</span>
+											</p>
+										}
+										{attributes.showPostTitle &&
+											<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
+										}
+										{attributes.showPostContent &&
+											<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
+										}
+									</div>
+								)}
 							</div>
 						))}
 

@@ -11,6 +11,84 @@
 	"supports": {
 		"html": false
 	},
+	"attributes": {
+		"apiUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"apiPostUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"apiPostData": {
+			"type": "array",
+			"default": []
+		},
+		"showThumb": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPostTitle": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPostMeta": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPostContent": {
+			"type": "boolean",
+			"default": true
+		},
+		"slideItems": {
+			"type": "number",
+			"default": 3
+		},
+		"enableResponsive": {
+			"type": "boolean",
+			"default": true
+		},
+		"autoLoop": {
+			"type": "boolean",
+			"default": true
+		},
+		"scrollSpeed": {
+			"type": "number",
+			"default": 300
+		},
+		"enableMousewheel": {
+			"type": "boolean",
+			"default": false
+		},
+		"enableNavigation": {
+			"type": "boolean",
+			"default": true
+		},
+		"enablePagination": {
+			"type": "boolean",
+			"default": true
+		},
+		"enableAutoplay": {
+			"type": "boolean",
+			"default": false
+		},
+		"autoplayDelay": {
+			"type": "number",
+			"default": 5000
+		},
+		"toggleValue": {
+			"type": "boolean",
+			"default": false
+		},
+		"checkboxValue": {
+			"type": "boolean",
+			"default": false
+		},
+		"rangeValue": {
+			"type": "number",
+			"default": 50
+		}
+	},
 	"textdomain": "slideshow-block",
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",

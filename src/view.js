@@ -21,7 +21,7 @@
  */
 
 import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay, Mousewheel, A11y } from 'swiper/modules';
+import { A11y, Autoplay, Mousewheel, Navigation, Pagination } from 'swiper/modules';
 
 document.querySelectorAll('.swiper').forEach(function (el) {
 
@@ -57,26 +57,26 @@ document.querySelectorAll('.swiper').forEach(function (el) {
 	};
 
 	if (enableNavigation) {
-		swiperConfig.navigation = enableNavigation || false;
+		swiperConfig.navigation = {
+			nextEl: '.swiper-button-next',
+			prevEl: '.swiper-button-prev',
+		};
 	}
 
 	if (enablePagination) {
-		swiperConfig.pagination = enablePagination ? { clickable: true } : false
+		swiperConfig.pagination = { clickable: true };
 	}
 
 	if (enableAutoplay) {
-		swiperConfig.loop = autoLoop || true
+		swiperConfig.loop = autoLoop || true;
 	}
 
-
 	if (autoplayDelay) {
-		swiperConfig.autoplay = autoplayDelay
-			? { delay: autoplayDelay.delay || 5000 }
-			: false
+		swiperConfig.autoplay = { delay: autoplayDelay };
 	}
 
 	if (enableMousewheel) {
-		swiperConfig.mousewheel = enableMousewheel ? { forceToAxis: true } : false
+		swiperConfig.mousewheel = { forceToAxis: true };
 	}
 
 	if (enableResponsive) {
@@ -93,7 +93,7 @@ document.querySelectorAll('.swiper').forEach(function (el) {
 				slidesPerView: 3,
 				spaceBetween: 40
 			}
-		}
+		};
 	}
 
 	new Swiper(el, swiperConfig);
