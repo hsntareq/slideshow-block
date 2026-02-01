@@ -334,7 +334,7 @@ export default function Edit({ attributes, setAttributes }) {
 										</p>
 									}
 									{attributes.showPostTitle &&
-										<h4><a href={slide.link} dangerouslySetInnerHTML={{ __html: slide.title.rendered }} /></h4>
+										<h4>{slide.title.rendered}</h4>
 									}
 									{attributes.showPostContent &&
 										<div dangerouslySetInnerHTML={{ __html: (slide.excerpt.rendered) }} />
