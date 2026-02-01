@@ -48,6 +48,7 @@ document.querySelectorAll('.swiper').forEach(function (el) {
 		modules: [Navigation, Pagination, Mousewheel, A11y, Autoplay],
 		spaceBetween: 20,
 		slidesPerView: slideItems,
+		speed: scrollSpeed || 300,
 		navigation: {
 			enabled: false,
 			nextEl: '.swiper-button-next',

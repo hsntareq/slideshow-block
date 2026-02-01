@@ -58,7 +58,7 @@
 		},
 		"enableMousewheel": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"enableNavigation": {
 			"type": "boolean",
@@ -70,11 +70,11 @@
 		},
 		"enableAutoplay": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"autoplayDelay": {
 			"type": "number",
-			"default": 5000
+			"default": 3000
 		},
 		"toggleValue": {
 			"type": "boolean",
