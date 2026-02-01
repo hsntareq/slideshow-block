@@ -56,6 +56,8 @@ export default function Edit({ attributes, setAttributes }) {
 	const [postData, setPostData] = useState(attributes.apiPostData);
 	const [isValidUrlMessage, setIsValidUrlMessage] = useState('');
 	const [isLoading, setIsLoading] = useState(true);
+	const [apiError, setApiError] = useState('');
+	const [showApiError, setShowApiError] = useState(true);
 
 
 	// Function to update the API URL in the InspectorControls component
@@ -101,8 +103,22 @@ export default function Edit({ attributes, setAttributes }) {
 	// Function to fetch post data from the API
 	const getExternalApiPosts = async (url) => {
 		try {
+			setApiError('');
+			setShowApiError(true);
 			const response = await fetch(`${url}/wp-json/wp/v2/posts`);
 			const result = await response.json();
+
+			if (!response.ok) {
+				setApiError('DRA: Only authenticated users can access the REST API.');
+				setIsLoading(false);
+				return;
+			}
+
+			if (result.code) {
+				setApiError('DRA: Only authenticated users can access the REST API.');
+				setIsLoading(false);
+				return;
+			}
 
 			const mediaDetailsPromises = result.map(async (post) => {
 				if (post.featured_media) {
@@ -134,6 +150,8 @@ export default function Edit({ attributes, setAttributes }) {
 			setIsLoading(false);
 		} catch (error) {
 			console.error("Error:", error);
+			setApiError('DRA: Only authenticated users can access the REST API.');
+			setIsLoading(false);
 		}
 	};
 
@@ -161,6 +179,33 @@ export default function Edit({ attributes, setAttributes }) {
 						{isValidUrlMessage}
 					</div>
 					{urlError && <div style={{ color: 'red' }}>{urlError}</div>}
+					{apiError && showApiError && (
+						<div style={{
+							color: 'red',
+							marginBlock: '10px',
+							padding: '10px',
+							backgroundColor: '#ffebee',
+							borderRadius: '4px',
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center'
+						}}>
+							<span>{apiError}</span>
+							<button
+								onClick={() => setShowApiError(false)}
+								style={{
+									background: 'none',
+									border: 'none',
+									color: 'red',
+									cursor: 'pointer',
+									fontSize: '16px',
+									padding: '0 5px'
+								}}
+							>
+								✕
+							</button>
+						</div>
+					)}
 					<Button variant="secondary" onClick={handleInspectControlButtonClick}>Update Values</Button>
 				</PanelBody>
 				<PanelBody title="Show/Hide Items">
@@ -243,7 +288,7 @@ export default function Edit({ attributes, setAttributes }) {
 
 			{isLoading &&
 				<div style={{ 'display': 'flex', 'justifyContent': 'center' }}>
-					<div class="lds-ripple"><div></div><div></div></div>
+					<div className="lds-ripple"><div></div><div></div></div>
 				</div>
 			}
 
