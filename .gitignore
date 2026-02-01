@@ -19,7 +19,7 @@ build
 # ignore log files and databases
 *-lock.json
 *.log
-*.lock
+*.lock*
 *.sql
 *.sqlite
 *.zip
