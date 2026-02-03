@@ -63,6 +63,25 @@ A powerful WordPress Gutenberg block for displaying remote website posts in an i
 - Remote website must have REST API enabled
 - CORS must be configured to allow requests (or use same-origin sites)
 
+## Configuration
+
+### Block Settings
+
+Once added to a post or page, access block settings through the Inspector panel on the right:
+
+- **API URL**: Enter the base URL of the WordPress site to fetch posts from
+- **Slider Display**: Choose number of items per slide
+- **Autoplay Settings**: Enable autoplay and set delay between slides
+- **Navigation**: Toggle arrow navigation and pagination dots
+- **Content Options**: Select which content elements to display (thumbnails, titles, meta, content)
+
+## Advanced Features
+
+- **Responsive Breakpoints**: Automatically adjusts slide count based on screen size
+- **Smooth Animations**: CSS3 and hardware-accelerated transitions for optimal performance
+- **SEO Friendly**: Maintains proper semantic HTML structure
+- **Accessibility**: Full WCAG compliance with ARIA labels and keyboard navigation
+
 ## Troubleshooting
 
 ### CORS Errors
@@ -84,3 +103,25 @@ This plugin is released under the GPL-2.0-or-later License. See the LICENSE file
 ## Support
 
 For issues or questions, please contact the plugin developers.
+
+## Contributing
+
+We welcome contributions! Please feel free to submit pull requests or open issues for bug reports and feature requests.
+
+## Changelog
+
+### Version 0.1.0
+
+- Initial release
+- Remote post fetching functionality
+- Swiper slider integration
+- Customizable navigation and display options
+- Responsive design support
+
+## Author
+
+The WordPress Contributors
+
+## Changelog Format
+
+For more detailed changelog information, please see the [readme.txt](readme.txt) file.
