@@ -20,7 +20,7 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
  */
 
-import Swiper from 'swiper';
+import { Swiper } from 'swiper';
 import { A11y, Autoplay, Mousewheel, Navigation, Pagination } from 'swiper/modules';
 
 document.querySelectorAll('.swiper').forEach(function (el) {
